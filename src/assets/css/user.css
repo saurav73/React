@@ -1,0 +1,48 @@
+#users {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1rem;
+    text-align: left;
+}
+
+#users thead {
+    background-color: #f2f2f2;
+}
+
+#users th, #users td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+#users th {
+    background-color: #0f72b4;
+    color: white;
+}
+
+#users tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#users tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#users tr:hover {
+    background-color: #e0f7fa;
+    transform: scale(1.02);
+}
+
+#users td {
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+#users td:hover {
+    color: #0f72b4;
+}
+
+#users tr:focus-within {
+    background-color: #e0f7fa;
+    outline: 2px solid #0f72b4;
+}
