@@ -1,4 +1,3 @@
-import React from 'react';
 import UserHeader from './UserHeader';
 import UserRow from './UserRow';
 
@@ -38,15 +37,13 @@ const Users = (props) => {
     }
   ];
 
-  const handleAddUser = () => {
-  };
-
   return (
     <div>
       <div className="v-row dashboard-row">
         <div className="v-col dashboard-col dashboard-col-1">
           <h2>Hello, Admin!</h2>
-          <button className="button-add" onClick={handleAddUser}>Add User</button>
+
+          <button class Name="button-add" >Create</button>
           <p>Welcome to the {props.title} Lists</p>
           <table id="users">
             <thead>
