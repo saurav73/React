@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from "react-router";
 import UserHeader from './UserHeader';
 import UserRow from './UserRow';
 
 const Users = (props) => {
+  const navigate = useNavigate();
   const data = [
     {
       id: 1,
@@ -39,6 +41,8 @@ const Users = (props) => {
   ];
 
   const handleAddUser = () => {
+    console.log("Add's user");
+    navigate("/admin/users/add");
   };
 
   return (

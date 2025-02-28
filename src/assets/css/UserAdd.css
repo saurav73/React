@@ -33,6 +33,14 @@
     box-sizing: border-box;
 }
 
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
 .button-add {
     background-color: #0f72b4;
     color: white;
@@ -43,7 +51,7 @@
     font-size: 1rem;
     transition: background-color 0.3s ease, transform 0.3s ease;
     display: block;
-    width: 100%;
+    width: 40vh;
     margin-top: 20px;
 }
 
