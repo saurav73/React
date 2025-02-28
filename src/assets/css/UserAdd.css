@@ -64,3 +64,11 @@
     background-color: #0b4a82;
     transform: scale(1);
 }
+
+.error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    animation: fadeOut 5s forwards;
+}
+
