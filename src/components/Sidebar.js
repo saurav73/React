@@ -1,6 +1,8 @@
 import { NavLink } from "react-router";
 
+
 const Sidebar = () => {
+ 
   return (
     <div className="v-col sidebar">
       Admin
@@ -23,7 +25,7 @@ const Sidebar = () => {
         </li>
 
         <li>
-          <NavLink to="/logout" end>
+          <NavLink to="/login" end>
             Logout
           </NavLink>
         </li>
