@@ -1,6 +1,8 @@
 import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router'; 
+import login from '../../assets/image/login.gif';
+
 
 const Login = () => {
   const [user, setUser] = useState({ username: "", password: "" });
@@ -27,7 +29,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
-        <img  alt="Logo" />
+        <img src={login} alt="Logo" />
         <h1>Login</h1>
         <form>
           <label style={{display: "block", marginBottom: "10px" , color: "red"}}>{error}</label>
