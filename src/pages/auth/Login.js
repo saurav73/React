@@ -19,11 +19,13 @@ const Login = () => {
     console.log(user.username , user.password);
     console.log("button clicked")
     if(user.username ==="admin" && user.password === "admin"){
-      alert("Login success");
+       localStorage.setItem("is_login", "1");
       navigate("/admin/dashboard");
+     alert("Login success");
     }
     else{
-      setError("Invalid Credentials");
+      localStorage.setItem("is_login", "0");
+      setError("Invalid Username or Password");
       }
     }
 

@@ -16,11 +16,11 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background-color: rgb(171, 209, 243);
+    background-color: #CAF0F8;
 }
 
 .header__logo h1 {
-    margin: 0;
+    margin-left: 4rem;
     display: flex;
     align-items: center;
 }
@@ -124,7 +124,7 @@ li:hover {
 
 .content:hover {
     background-color: #e0e0e0;
-}
+} 
 
 .footer {
     background-color: #333;

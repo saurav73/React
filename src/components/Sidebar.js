@@ -1,11 +1,14 @@
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 
 
 const Sidebar = () => {
- 
+  const navigate = useNavigate();
+  const handleClick = () => {
+    localStorage.setItem("is_login", "0");
+    navigate("/login");
+  }
   return (
     <div className="v-col sidebar">
-      Admin
       <ul className="v-col">
         <li>
           <NavLink to="/admin/dashboard" end>
@@ -25,13 +28,13 @@ const Sidebar = () => {
         </li>
 
         <li>
-          <NavLink to="/login" end>
-            Logout
-          </NavLink>
+          <button type="button" onClick={handleClick}>Logout</button>
         </li>
       </ul>
     </div>
   );
 };
+
+
 
 export default Sidebar;
