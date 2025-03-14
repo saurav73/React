@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import '../../assets/css/user.css'; // Ensure this path is correct
+import React, { useState } from "react";
+import "../../assets/css/user.css"; // Ensure this path is correct
 
 const UserAdd = () => {
   const [user, setUser] = useState({

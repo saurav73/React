@@ -5,7 +5,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const handleClick = () => {
     localStorage.setItem("is_login", "0");
-    navigate("/login");
+    navigate("/");
   }
   return (
     <div className="v-col sidebar">
@@ -24,6 +24,11 @@ const Sidebar = () => {
         <li>
           <NavLink to="/admin/setting" end>
             Setting
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/admin/antdesign" end>
+            Ant Design
           </NavLink>
         </li>
 
