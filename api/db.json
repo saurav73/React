@@ -1,43 +1,61 @@
 {
-    
-
-    "users":[
-        {
-            "id": "1fba637ab-daba-4512-8d21-2f7c057a53f9",
-            "firstName": "John",
-            "lastName": "Brown",
-            "age": 32,
-            "address": "New York No. 1 Lake Park",
-            "tags": ["nice", "developer"],
-            "role": "admin"
-          },
-          {
-            "id": "aa1e2a85-3306-4f16-92ac-79832ee76a7d",
-            "firstName": "Jim",
-            "lastName": "Green",
-            "age": 42,
-            "address": "London No. 1 Lake Park",
-            "tags": ["loser"],
-            "role": "user"
-          },
-          {
-            "id": "1e51f58b-72bd-4c36-b972-67b22e1d25c1",
-            "firstName": "John",
-            "lastName": "Brown",
-            "age": 32,
-            "address": "New York No. 1 Lake Park",
-            "tags": ["nice", "developer"],
-            "role": "admin"
-          },
-          {
-            "id": "2ae8dafd-f0f5-48ca-a26c-09f69c13c10f",
-            "firstName": "Jim",
-            "lastName": "Green",
-            "age": 42,
-            "address": "London No. 1 Lake Park",
-            "tags": ["loser"],
-            "role": "user"
-          }
-         
-    ]
-  }
+  "users": [
+    {
+      "id": "1fba637ab-daba-4512-8d21-2f7c057a53f9",
+      "firstName": "John",
+      "lastName": "Brown",
+      "age": 32,
+      "address": "New York No. 1 Lake Park",
+      "tags": [
+        "nice",
+        "developer"
+      ],
+      "role": "admin",
+      "email": "yijojo7993@owlny.com"
+    },
+    {
+      "id": "aa1e2a85-3306-4f16-92ac-79832ee76a7d",
+      "firstName": "Jim",
+      "lastName": "Green",
+      "age": 42,
+      "address": "London No. 1 Lake Park",
+      "tags": [
+        "loser"
+      ],
+      "role": "users"
+    },
+    {
+      "id": "1e51f58b-72bd-4c36-b972-67b22e1d25c1",
+      "firstName": "John",
+      "lastName": "Brown",
+      "age": 32,
+      "address": "New York No. 1 Lake Park",
+      "tags": [
+        "nice",
+        "developer"
+      ],
+      "role": "admin"
+    },
+    {
+      "id": "2ae8dafd-f0f5-48ca-a26c-09f69c13c10f",
+      "firstName": "Jim",
+      "lastName": "Green",
+      "age": 42,
+      "address": "London No. 1 Lake Park",
+      "tags": [
+        "loser"
+      ],
+      "role": "users"
+    },
+    {
+      "id": "dc90",
+      "firstName": "John chamling",
+      "lastname": "",
+      "age": "237",
+      "email": "yijojo7993@owlny.com",
+      "phone": "9841",
+      "address": "iss vanxu",
+      "role": "chup"
+    }
+  ]
+}

@@ -2,8 +2,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Setting from "./pages/Setting";
-import Users from "./pages/User/Users";
-import UserAdd from "./pages/User/UserAdd";
+import Users from "./pages/Users/Users";
+import UserAdd from "./pages/Users/UserAdd";
 import Login from "./pages/auth/Login";
 import CustomLayout from "./components/Layout";
 import Antlayout from "./components/Antlayout";
@@ -11,7 +11,7 @@ import "./assets/css/main.css";
 import "./assets/css/user.css";
 import "./assets/css/UserAdd.css";
 import "./assets/css/login.css";
-import UserDetails from "./pages/User/UserDetails";
+import UserDetails from "./pages/Users/UserDetails";
 
 const App = () => {
   return (
@@ -24,6 +24,7 @@ const App = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users  />} />
           <Route path="users/add" element={<UserAdd />} />
+          <Route path="users/edit/:userId" element={<UserAdd />} />
           <Route path="users/details/:userId" element={<UserDetails  />} />
           <Route path="setting" element={<Setting />} />
           <Route path="antdesign" element={<Antlayout />} />

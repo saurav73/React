@@ -1,4 +1,4 @@
-.user-add-form {
+.users-add-form {
     background-color: #f9f9f9;
     padding: 20px;
     border-radius: 8px;
@@ -7,7 +7,7 @@
     margin: 0 auto;
 }
 
-.user-add-form h3 {
+.users-add-form h3 {
     margin-bottom: 20px;
     color: #333;
     text-align: center;

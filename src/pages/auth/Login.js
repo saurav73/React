@@ -7,20 +7,20 @@ import login from "../../assets/image/login.gif";
 
 
 const Login = () => {
-  const [user, setUser] = useState({ username: "", password: "" });
+  const [users, setUser] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const handleusernameChange = (e) => {
-    setUser({ ...user, username: e.target.value });
+    setUser({ ...users, username: e.target.value });
   }
   const handlePasswordChange = (e) => {
-    setUser({ ...user, password: e.target.value });
+    setUser({ ...users, password: e.target.value });
   }
   // const handleButtonClick = () => {
-  //   console.log(user);
-  //   console.log(user.username , user.password);
+  //   console.log(users);
+  //   console.log(users.username , users.password);
   //   console.log("button clicked")
-  //   if(user.username ==="admin" && user.password === "admin"){
+  //   if(users.username ==="admin" && users.password === "admin"){
   //      localStorage.setItem("is_login", "1");
   //     navigate("/admin/dashboard");
   //    alert("Login success");
@@ -51,9 +51,9 @@ const onFinish = (values) => {
         {/* <form>
           <label style={{display: "block", marginBottom: "10px" , color: "red"}}>{error}</label>
             <label>username</label>
-            <input type="username" placeholder="Enter your username" value={user.username} onChange={handleusernameChange}/>
+            <input type="username" placeholder="Enter your username" value={users.username} onChange={handleusernameChange}/>
             <label>Password</label>
-            <input type="password" placeholder="Enter your password" value={user.password} onChange={handlePasswordChange} />
+            <input type="password" placeholder="Enter your password" value={users.password} onChange={handlePasswordChange} />
             <button type="button" onClick={handleButtonClick}>Submit</button>
         </form> */}
         <Form

@@ -4,7 +4,7 @@ const Setting = () => {
       <h2>Setting</h2>
       <p>Welcome to the Setting Page</p>
       <div>
-        <label>User Information</label>
+        <label>users Information</label>
         <input type="text" placeholder="Name" />
         <input type="text" placeholder="Email" />
         <input type="text" placeholder="Phone" />
