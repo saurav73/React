@@ -26,23 +26,43 @@ import { checkLogin } from '../../utils/user.util';
 import { showErrorToast, showSuccessToast } from '../../utils/toastify.util';
 import { UserContext } from "../../context/user.context"
 
-
-
 const { Header, Content, Footer } = Layout
 const { Title, Text, Paragraph } = Typography
 
 const SignIn = () => {
-
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches,
   )
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode)
 
-
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const { _setUser } = useContext(UserContext);
+
   const onFinish = (values) => {
+    // Check for admin credentials
+    if (values.email === "poemadmin@gmail.com" && values.password === "admin") {
+      const adminUser = {
+        id: "admin-001",
+        email: values.email,
+        username: "poemadmin",
+        role: "admin",
+      };
+      
+      // Save admin user to local storage
+      localStorage.setItem('is_login', 1);
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      localStorage.setItem('role', 'admin'); // Optional: store role for future use
+      
+      // Update user context
+      _setUser(adminUser);
+      
+      showSuccessToast('Admin login successful');
+      navigate('/admin/dashboard');
+      return; // Exit the function after handling admin login
+    }
+
+    // Regular user login flow
     console.log('Success:', values);
     checkLogin(values.email, values.password).then((data) => {
       if (data === null) {
@@ -135,9 +155,7 @@ const SignIn = () => {
 
             <Form
               name="signin_form"
-
               onFinish={onFinish}
-
               onFinishFailed={onFinishFailed}
               layout="vertical"
               size="large"
@@ -182,7 +200,6 @@ const SignIn = () => {
                   type="primary"
                   htmlType="submit"
                   block
-                 
                   style={{
                     height: "45px",
                     borderRadius: "8px",
@@ -198,7 +215,6 @@ const SignIn = () => {
 
               <Divider style={{ color: isDarkMode ? "#d9d9d9" : "#666" }}>-</Divider>
 
-              
               <div style={{ textAlign: "center" }}>
                 <Text style={{ color: isDarkMode ? "#d9d9d9" : "#666" }}>
                   Don't have an account?{" "}
@@ -222,4 +238,3 @@ const SignIn = () => {
 }
 
 export default SignIn
-

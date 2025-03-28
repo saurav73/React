@@ -17,8 +17,6 @@ import {
   Tooltip,
   Popconfirm,
   message,
-  Tabs,
-  Switch,
 } from "antd"
 import {
   SearchOutlined,
@@ -27,17 +25,61 @@ import {
   DeleteOutlined,
   EyeOutlined,
   CalendarOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons"
 import { getPoems, createPoem, updatePoem, deletePoem } from "../../utils/poem.util"
 import axios from "axios"
+import Header from "../../components/Header"
+
+// Add some custom CSS for the Popconfirm
+const customStyles = `
+  .custom-popconfirm .ant-popconfirm-inner-content {
+    padding: 16px !important;
+  }
+  .custom-popconfirm .ant-popconfirm-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    color: #333;
+  }
+  .custom-popconfirm .ant-popconfirm-message-icon {
+    font-size: 24px;
+    color: #ff4d4f !important;
+  }
+  .custom-popconfirm .ant-popconfirm-description {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+  }
+  .custom-popconfirm .ant-popconfirm-buttons {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .custom-popconfirm .ant-btn {
+    border-radius: 4px;
+    padding: 4px 16px;
+  }
+  .custom-popconfirm .ant-btn-default {
+    border-color: #d9d9d9;
+    color: #666;
+  }
+  .custom-popconfirm .ant-btn-primary {
+    background-color: #ff4d4f;
+    border-color: #ff4d4f;
+    color: white;
+  }
+  .custom-popconfirm .ant-btn-primary:hover {
+    background-color: #ff7875;
+    border-color: #ff7875;
+  }
+`
 
 const { Title, Text, Paragraph } = Typography
 const { Option } = Select
 const { TextArea } = Input
-const { TabPane } = Tabs
 
 const Poems = () => {
   const [loading, setLoading] = useState(true)
@@ -48,7 +90,6 @@ const Poems = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [currentPoem, setCurrentPoem] = useState(null)
-  const [activeTab, setActiveTab] = useState("all")
   const [form] = Form.useForm()
   const [currentUser, setCurrentUser] = useState(null)
 
@@ -78,14 +119,7 @@ const Poems = () => {
       const usersResponse = await axios.get("http://localhost:4000/users")
       setUsers(usersResponse.data)
 
-      // Enhance poems with status and featured flags (mock data since they're not in your schema)
-      const enhancedPoems = poemsData.map((poem) => ({
-        ...poem,
-        status: "published", // Assuming all poems are published by default
-        featured: poem.likes > 200, // Just an example condition
-      }))
-
-      setPoems(enhancedPoems)
+      setPoems(poemsData)
       setLoading(false)
     } catch (error) {
       console.error("Error fetching data:", error)
@@ -103,8 +137,6 @@ const Poems = () => {
         content: poem.content,
         category: poem.category,
         tags: Array.isArray(poem.tags) ? poem.tags : [poem.tags],
-        status: poem.status || "published",
-        featured: poem.featured || false,
       })
     } else {
       setIsEditMode(false)
@@ -155,14 +187,7 @@ const Poems = () => {
 
         const createdPoem = await createPoem(newPoem)
 
-        // Add to local state with enhanced fields
-        const enhancedNewPoem = {
-          ...createdPoem,
-          status: "published",
-          featured: false,
-        }
-
-        setPoems([enhancedNewPoem, ...poems])
+        setPoems([createdPoem, ...poems])
         message.success("Poem added successfully")
       }
 
@@ -185,28 +210,11 @@ const Poems = () => {
     }
   }
 
-  const handleFeaturedChange = (checked, poemId) => {
-    const updatedPoems = poems.map((poem) => (poem.id === poemId ? { ...poem, featured: checked } : poem))
-    setPoems(updatedPoems)
-    message.success(`Poem ${checked ? "featured" : "unfeatured"} successfully`)
-  }
-
-  const handleStatusChange = (status, poemId) => {
-    const updatedPoems = poems.map((poem) => (poem.id === poemId ? { ...poem, status } : poem))
-    setPoems(updatedPoems)
-    message.success(`Poem status changed to ${status}`)
-  }
-
   const filteredPoems = poems.filter((poem) => {
     const matchesSearch =
       poem.title?.toLowerCase().includes(searchText.toLowerCase()) ||
       poem.author?.toLowerCase().includes(searchText.toLowerCase()) ||
       poem.content?.toLowerCase().includes(searchText.toLowerCase())
-
-    if (activeTab === "all") return matchesSearch
-    if (activeTab === "published") return matchesSearch && poem.status === "published"
-    if (activeTab === "drafts") return matchesSearch && poem.status === "draft"
-    if (activeTab === "featured") return matchesSearch && poem.featured
 
     return matchesSearch
   })
@@ -260,30 +268,6 @@ const Poems = () => {
       ),
     },
     {
-      title: "Status",
-      key: "status",
-      render: (_, record) => (
-        <Space direction="vertical" size={0}>
-          <Tag color={record.status === "published" ? "success" : "default"}>
-            {record.status === "published" ? (
-              <>
-                <CheckCircleOutlined /> Published
-              </>
-            ) : (
-              <>
-                <CloseCircleOutlined /> Draft
-              </>
-            )}
-          </Tag>
-          {record.featured && (
-            <Tag color="gold" style={{ marginTop: "4px" }}>
-              Featured
-            </Tag>
-          )}
-        </Space>
-      ),
-    },
-    {
       title: "Date",
       dataIndex: "timestamp",
       key: "timestamp",
@@ -310,22 +294,22 @@ const Poems = () => {
           <Tooltip title="Edit Poem">
             <Button shape="circle" icon={<EditOutlined />} size="small" onClick={() => showModal(record)} />
           </Tooltip>
-          <Tooltip title="Toggle Featured">
-            <Switch
-              size="small"
-              checked={record.featured}
-              onChange={(checked) => handleFeaturedChange(checked, record.id)}
-              checkedChildren="Featured"
-              unCheckedChildren="Regular"
-            />
-          </Tooltip>
           <Popconfirm
-            title="Are you sure you want to delete this poem?"
-            description="This action cannot be undone."
-            icon={<ExclamationCircleOutlined style={{ color: "red" }} />}
+            title={
+              <div>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>
+                  Confirm Deletion
+                </div>
+                <div style={{ marginTop: "8px", color: "#666" }}>
+                  Are you sure you want to delete the poem <strong>{record.title}</strong>? This action cannot be undone.
+                </div>
+              </div>
+            }
+            icon={<ExclamationCircleOutlined />}
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Delete"
+            cancelText="Cancel"
+            overlayClassName="custom-popconfirm"
           >
             <Tooltip title="Delete Poem">
               <Button type="primary" danger shape="circle" icon={<DeleteOutlined />} size="small" />
@@ -337,7 +321,10 @@ const Poems = () => {
   ]
 
   return (
+    <>
+    <Header />
     <div className="poems-container">
+      <style>{customStyles}</style>
       <Title level={2}>Poem Management</Title>
       <Text type="secondary">Manage all poems on the platform.</Text>
 
@@ -356,13 +343,6 @@ const Poems = () => {
             Add Poem
           </Button>
         </div>
-
-        <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
-          <TabPane tab={<span>All Poems</span>} key="all" />
-          <TabPane tab={<span>Published</span>} key="published" />
-          <TabPane tab={<span>Drafts</span>} key="drafts" />
-          <TabPane tab={<span>Featured</span>} key="featured" />
-        </Tabs>
 
         <Table
           columns={columns}
@@ -392,7 +372,7 @@ const Poems = () => {
           <Form.Item name="category" label="Category" rules={[{ required: true, message: "Please select a category" }]}>
             <Select placeholder="Select a category">
               <Option value="Nature">Nature</Option>
-              <Option value="Love">Love</Option>
+              <Option value="Love W">Love</Option>
               <Option value="Inspirational">Inspirational</Option>
               <Option value="Classic">Classic</Option>
               <Option value="Other">Other</Option>
@@ -407,17 +387,6 @@ const Poems = () => {
               <Option value="Dreams">Dreams</Option>
               <Option value="Hope">Hope</Option>
             </Select>
-          </Form.Item>
-
-          <Form.Item name="status" label="Status" rules={[{ required: true, message: "Please select a status" }]}>
-            <Select placeholder="Select a status">
-              <Option value="published">Published</Option>
-              <Option value="draft">Draft</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="featured" label="Featured" valuePropName="checked">
-            <Switch checkedChildren="Featured" unCheckedChildren="Regular" />
           </Form.Item>
 
           <Form.Item>
@@ -510,8 +479,8 @@ const Poems = () => {
         )}
       </Modal>
     </div>
+    </>
   )
 }
 
 export default Poems
-

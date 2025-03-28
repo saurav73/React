@@ -18,9 +18,7 @@ import {
   message,
   ConfigProvider,
   theme as antTheme,
-  Badge,
   Drawer,
-  Checkbox,
   Spin,
 } from "antd"
 import {
@@ -30,7 +28,6 @@ import {
   HeartFilled,
   PlusOutlined,
   LogoutOutlined,
-  BellOutlined,
   SearchOutlined,
   HomeOutlined,
   FireOutlined,
@@ -50,10 +47,6 @@ import {
   deletePoem,
   getPoems,
   updatePoem,
-  getNotifications,
-  createNotification,
-  updateNotification,
-  deleteNotification,
   likePoem,
   unlikePoem,
   getPoem,
@@ -76,22 +69,16 @@ const Dashboard = () => {
   const [activeCategory, setActiveCategory] = useState("all")
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
-  const [isNotificationModalVisible, setIsNotificationModalVisible] = useState(false)
-  const [isEditNotificationModalVisible, setIsEditNotificationModalVisible] = useState(false)
   const [likedPoems, setLikedPoems] = useState({})
   const [poems, setPoems] = useState([])
   const [filteredPoems, setFilteredPoems] = useState([])
-  const [notifications, setNotifications] = useState([])
   const [currentPoem, setCurrentPoem] = useState(null)
-  const [currentNotification, setCurrentNotification] = useState(null)
   const [user, setUser] = useState(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
   const [isLoadingPoems, setIsLoadingPoems] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [form] = Form.useForm()
   const [editForm] = Form.useForm()
-  const [notificationForm] = Form.useForm()
-  const [editNotificationForm] = Form.useForm()
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const navigate = useNavigate()
 
@@ -183,21 +170,6 @@ const Dashboard = () => {
 
     setFilteredPoems(filtered)
   }, [activeCategory, searchQuery, poems])
-
-  // Fetch notifications on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser)
-      const userId = parsedUser.id || parsedUser
-      getNotifications(userId)
-        .then((data) => setNotifications(data))
-        .catch((error) => {
-          console.error("Error fetching notifications:", error)
-          showErrorToast("Failed to fetch notifications")
-        })
-    }
-  }, [])
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
@@ -330,82 +302,6 @@ const Dashboard = () => {
       })
   }
 
-  // Notification Modal Handlers
-  const showNotificationModal = () => setIsNotificationModalVisible(true)
-  const showEditNotificationModal = (notification) => {
-    setCurrentNotification(notification)
-    editNotificationForm.setFieldsValue({
-      message: notification.message,
-      timestamp: notification.timestamp,
-      read: notification.read,
-    })
-    setIsEditNotificationModalVisible(true)
-  }
-  const handleNotificationCancel = () => {
-    setIsNotificationModalVisible(false)
-    notificationForm.resetFields()
-  }
-  const handleEditNotificationCancel = () => {
-    setIsEditNotificationModalVisible(false)
-    editNotificationForm.resetFields()
-    setCurrentNotification(null)
-  }
-  const handleNotificationSubmit = (values) => {
-    if (!user) {
-      message.error("User not found. Please log in again.")
-      return
-    }
-    const newNotification = {
-      message: values.message,
-      timestamp: values.timestamp || "Just now",
-      userId: user.id,
-      read: values.read || false,
-    }
-    createNotification(newNotification)
-      .then((data) => {
-        setNotifications([data, ...notifications])
-        setIsNotificationModalVisible(false)
-        notificationForm.resetFields()
-        message.success("Notification created successfully!")
-      })
-      .catch((error) => {
-        console.error("Error creating notification:", error)
-        message.error("Failed to create notification")
-      })
-  }
-  const handleEditNotificationSubmit = (values) => {
-    if (!currentNotification) return
-    const updatedNotification = {
-      ...currentNotification,
-      message: values.message,
-      timestamp: values.timestamp,
-      read: values.read,
-    }
-    updateNotification(currentNotification.id, updatedNotification)
-      .then((data) => {
-        setNotifications(notifications.map((notif) => (notif.id === data.id ? data : notif)))
-        setIsEditNotificationModalVisible(false)
-        editNotificationForm.resetFields()
-        setCurrentNotification(null)
-        message.success("Notification updated successfully!")
-      })
-      .catch((error) => {
-        console.error("Error updating notification:", error)
-        message.error("Failed to update notification")
-      })
-  }
-  const handleDeleteNotification = (id) => {
-    deleteNotification(id)
-      .then(() => {
-        setNotifications(notifications.filter((notif) => notif.id !== id))
-        message.success("Notification deleted successfully!")
-      })
-      .catch((error) => {
-        console.error("Error deleting notification:", error)
-        message.error("Failed to delete notification")
-      })
-  }
-
   const { defaultAlgorithm, darkAlgorithm } = antTheme
   const customTheme = {
     token: {
@@ -457,9 +353,6 @@ const Dashboard = () => {
         colorTextPlaceholder: isDarkMode ? "#757575" : "#6b7280",
         colorBorder: isDarkMode ? "#616161" : "#d1d5db",
       },
-      Badge: {
-        colorBgBase: isDarkMode ? "#ef4444" : "#ef4444",
-      },
       Drawer: {
         colorBgElevated: isDarkMode ? "#1a1a1a" : "#ffffff",
       },
@@ -470,7 +363,6 @@ const Dashboard = () => {
     <Menu
       items={[
         { key: "1", label: "Profile", icon: <UserOutlined />, onClick: () => navigate(`/users/profile/${_user.id}`) },
-
         {
           key: "3",
           label: "Logout",
@@ -486,67 +378,6 @@ const Dashboard = () => {
         },
       ]}
     />
-  )
-
-  const notificationMenu = (
-    <Menu style={{ width: 300, padding: "8px 0" }}>
-      {notifications.length > 0 ? (
-        <>
-          <Menu.Item
-            key="create"
-            style={{ padding: "12px 16px", background: isDarkMode ? "#424242" : "#f3e8ff" }}
-            onClick={showNotificationModal}
-          >
-            <Text style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-              <PlusOutlined /> Create New Notification
-            </Text>
-          </Menu.Item>
-          {notifications.map((notification) => (
-            <Menu.Item key={notification.id} style={{ padding: "12px 16px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <Text style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    {notification.message}
-                    {notification.read ? "" : <Badge dot style={{ marginLeft: 8, color: "#ef4444" }} />}
-                  </Text>
-                  <Text style={{ color: isDarkMode ? "#757575" : "#6b7280", fontSize: "12px" }}>
-                    {notification.timestamp}
-                  </Text>
-                </div>
-                <Dropdown
-                  overlay={
-                    <Menu
-                      items={[
-                        {
-                          key: "edit",
-                          label: "Edit",
-                          icon: <EditOutlined />,
-                          onClick: () => showEditNotificationModal(notification),
-                        },
-                        {
-                          key: "delete",
-                          label: "Delete",
-                          icon: <DeleteOutlined />,
-                          danger: true,
-                          onClick: () => handleDeleteNotification(notification.id),
-                        },
-                      ]}
-                    />
-                  }
-                  trigger={["click"]}
-                >
-                  <Button type="text" icon={<MoreOutlined />} style={{ color: isDarkMode ? "#757575" : "#6b7280" }} />
-                </Dropdown>
-              </div>
-            </Menu.Item>
-          ))}
-        </>
-      ) : (
-        <Menu.Item>
-          <Text style={{ color: isDarkMode ? "#757575" : "#6b7280" }}>No new notifications</Text>
-        </Menu.Item>
-      )}
-    </Menu>
   )
 
   return (
@@ -699,27 +530,6 @@ const Dashboard = () => {
                 onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
                 onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
               />
-              <Dropdown overlay={notificationMenu} trigger={["click"]} placement="bottomRight">
-                <Badge count={notifications.filter((notif) => !notif.read).length} size="small" offset={[-4, 4]}>
-                  <Button
-                    type="text"
-                    icon={<BellOutlined />}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "50%",
-                      fontSize: "18px",
-                      color: isDarkMode ? "#e0e0e0" : "#4b5563",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  />
-                </Badge>
-              </Dropdown>
               <Dropdown overlay={userMenu} trigger={["click"]} placement="bottomRight">
                 <div
                   style={{
@@ -1253,255 +1063,9 @@ const Dashboard = () => {
             </Form>
           </div>
         </Modal>
-
-        <Modal
-          title={
-            <Title level={4} style={{ margin: 0, color: isDarkMode ? "#ffffff" : "#1f2937", fontWeight: 600 }}>
-              Create New Notification
-            </Title>
-          }
-          open={isNotificationModalVisible}
-          onCancel={handleNotificationCancel}
-          footer={null}
-          width={600}
-          style={{ top: 20 }}
-          bodyStyle={{
-            padding: "24px",
-            borderRadius: "12px",
-            background: isDarkMode ? "#212121" : "#ffffff",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-          }}
-          transitionName="ant-fade"
-        >
-          <div style={{ padding: "8px 0" }}>
-            <Form form={notificationForm} layout="vertical" onFinish={handleNotificationSubmit}>
-              <Form.Item
-                name="message"
-                label={
-                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    Message
-                  </Text>
-                }
-                rules={[{ required: true, message: "Please enter the notification message" }]}
-              >
-                <Input
-                  placeholder="Enter the notification message"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    fontSize: "16px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    transition: "all 0.3s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
-                  onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
-                />
-              </Form.Item>
-              <Form.Item
-                name="timestamp"
-                label={
-                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    Timestamp
-                  </Text>
-                }
-                initialValue="Just now"
-              >
-                <Input
-                  placeholder="Enter the timestamp (e.g., 5 mins ago)"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    fontSize: "16px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    transition: "all 0.3s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
-                  onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
-                />
-              </Form.Item>
-              <Form.Item
-                name="read"
-                label={
-                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    Read Status
-                  </Text>
-                }
-                valuePropName="checked"
-              >
-                <Checkbox style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Mark as Read</Checkbox>
-              </Form.Item>
-              <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-                <Space size="middle">
-                  <Button
-                    onClick={handleNotificationCancel}
-                    style={{
-                      borderRadius: "8px",
-                      padding: "6px 20px",
-                      fontSize: "14px",
-                      color: isDarkMode ? "#e0e0e0" : "#1f2937",
-                      borderColor: isDarkMode ? "#616161" : "#d1d5db",
-                      background: "transparent",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "#6d28d9"
-                      e.currentTarget.style.color = "#6d28d9"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"
-                      e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937"
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{
-                      background: "linear-gradient(90deg, #6d28d9, #a78bfa)",
-                      border: "none",
-                      boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)",
-                      borderRadius: "8px",
-                      padding: "6px 20px",
-                      fontSize: "14px",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  >
-                    Create Notification
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
-          </div>
-        </Modal>
-
-        <Modal
-          title={
-            <Title level={4} style={{ margin: 0, color: isDarkMode ? "#ffffff" : "#1f2937", fontWeight: 600 }}>
-              Edit Notification
-            </Title>
-          }
-          open={isEditNotificationModalVisible}
-          onCancel={handleEditNotificationCancel}
-          footer={null}
-          width={600}
-          style={{ top: 20 }}
-          bodyStyle={{
-            padding: "24px",
-            borderRadius: "12px",
-            background: isDarkMode ? "#212121" : "#ffffff",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-          }}
-          transitionName="ant-fade"
-        >
-          <div style={{ padding: "8px 0" }}>
-            <Form form={editNotificationForm} layout="vertical" onFinish={handleEditNotificationSubmit}>
-              <Form.Item
-                name="message"
-                label={
-                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    Message
-                  </Text>
-                }
-                rules={[{ required: true, message: "Please enter the notification message" }]}
-              >
-                <Input
-                  placeholder="Enter the notification message"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    fontSize: "16px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    transition: "all 0.3s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
-                  onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
-                />
-              </Form.Item>
-              <Form.Item
-                name="timestamp"
-                label={
-                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    Timestamp
-                  </Text>
-                }
-              >
-                <Input
-                  placeholder="Enter the timestamp (e.g., 5 mins ago)"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    fontSize: "16px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    transition: "all 0.3s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
-                  onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
-                />
-              </Form.Item>
-              <Form.Item
-                name="read"
-                label={
-                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
-                    Read Status
-                  </Text>
-                }
-                valuePropName="checked"
-              >
-                <Checkbox style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Mark as Read</Checkbox>
-              </Form.Item>
-              <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-                <Space size="middle">
-                  <Button
-                    onClick={handleEditNotificationCancel}
-                    style={{
-                      borderRadius: "8px",
-                      padding: "6px 20px",
-                      fontSize: "14px",
-                      color: isDarkMode ? "#e0e0e0" : "#1f2937",
-                      borderColor: isDarkMode ? "#616161" : "#d1d5db",
-                      background: "transparent",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "#6d28d9"
-                      e.currentTarget.style.color = "#6d28d9"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"
-                      e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937"
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{
-                      background: "linear-gradient(90deg, #6d28d9, #a78bfa)",
-                      border: "none",
-                      boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)",
-                      borderRadius: "8px",
-                      padding: "6px 20px",
-                      fontSize: "14px",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  >
-                    Update Notification
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
-          </div>
-        </Modal>
       </Layout>
     </ConfigProvider>
   )
 }
 
 export default Dashboard
-

@@ -32,6 +32,7 @@ import {
   HeartFilled,
   SunOutlined,
   MoonOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../../context/user.context";
@@ -56,6 +57,8 @@ const Profile = () => {
   const [isLoadingPoems, setIsLoadingPoems] = useState(true);
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
   const [isEditPoemModalVisible, setIsEditPoemModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [poemToDelete, setPoemToDelete] = useState(null);
   const [currentPoem, setCurrentPoem] = useState(null);
   const [likedPoems, setLikedPoems] = useState({});
   const [form] = Form.useForm();
@@ -212,15 +215,32 @@ const Profile = () => {
       });
   };
 
-  const handleDeletePoem = (id) => {
-    deletePoem(id)
+  // Delete Poem Handlers
+  const showDeleteConfirm = (poem) => {
+    setPoemToDelete(poem);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false);
+    setPoemToDelete(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!poemToDelete) return;
+
+    deletePoem(poemToDelete.id)
       .then(() => {
-        setPoems(poems.filter((poem) => poem.id !== id));
+        setPoems(poems.filter((poem) => poem.id !== poemToDelete.id));
         message.success("Poem deleted successfully!");
+        setIsDeleteModalVisible(false);
+        setPoemToDelete(null);
       })
       .catch((error) => {
         console.error("Error deleting poem:", error);
         message.error("Failed to delete poem");
+        setIsDeleteModalVisible(false);
+        setPoemToDelete(null);
       });
   };
 
@@ -233,7 +253,6 @@ const Profile = () => {
           icon: <UserOutlined />,
           onClick: () => navigate(`/users/profile/${_user?.id}`),
         },
-
         {
           key: "2",
           label: "Logout",
@@ -262,21 +281,21 @@ const Profile = () => {
     },
     components: {
       Layout: {
-        bodyBg: isDarkMode ? "#000000" : "#f9fafb", // Black background for dark mode
-        headerBg: isDarkMode ? "#1a1a1a" : "#ffffff", // Very dark gray for header
-        footerBg: isDarkMode ? "#1a1a1a" : "#f3f4f6", // Very dark gray for footer
+        bodyBg: isDarkMode ? "#000000" : "#f9fafb",
+        headerBg: isDarkMode ? "#1a1a1a" : "#ffffff",
+        footerBg: isDarkMode ? "#1a1a1a" : "#f3f4f6",
       },
       Card: {
-        colorBgContainer: isDarkMode ? "#1a1a1a" : "#ffffff", // Dark gray cards
+        colorBgContainer: isDarkMode ? "#1a1a1a" : "#ffffff",
         boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
         borderRadiusLG: 12,
-        colorBorder: isDarkMode ? "#333333" : "#e5e7eb", // Darker border for dark mode
+        colorBorder: isDarkMode ? "#333333" : "#e5e7eb",
       },
       Button: {
         colorText: "#ffffff",
         colorBgContainer: "#6d28d9",
         ghostColor: isDarkMode ? "#e5e7eb" : "#ffffff",
-        ghostBorderColor: isDarkMode ? "#404040" : "rgba(255,255,255,0.7)", // Dark gray ghost border
+        ghostBorderColor: isDarkMode ? "#404040" : "rgba(255,255,255,0.7)",
       },
       Tag: {
         colorBgContainer: isDarkMode ? "rgba(109, 40, 217, 0.15)" : "rgba(109, 40, 217, 0.1)",
@@ -284,18 +303,18 @@ const Profile = () => {
         colorText: isDarkMode ? "#d8b4fe" : "#6d28d9",
       },
       Modal: {
-        colorBgElevated: isDarkMode ? "#1a1a1a" : "#ffffff", // Dark gray modal background
+        colorBgElevated: isDarkMode ? "#1a1a1a" : "#ffffff",
         colorText: isDarkMode ? "#e5e7eb" : "#1f2937",
         colorTextHeading: isDarkMode ? "#ffffff" : "#1f2937",
         borderRadiusLG: 12,
       },
       Input: {
-        colorBgContainer: isDarkMode ? "#262626" : "#f9fafb", // Darker gray for inputs
-        colorTextPlaceholder: isDarkMode ? "#808080" : "#6b7280", // Medium gray placeholder
-        colorBorder: isDarkMode ? "#404040" : "#d1d5db", // Dark gray border
+        colorBgContainer: isDarkMode ? "#262626" : "#f9fafb",
+        colorTextPlaceholder: isDarkMode ? "#808080" : "#6b7280",
+        colorBorder: isDarkMode ? "#404040" : "#d1d5db",
       },
       Select: {
-        colorBgContainer: isDarkMode ? "#262626" : "#f9fafb", // Darker gray for selects
+        colorBgContainer: isDarkMode ? "#262626" : "#f9fafb",
         colorTextPlaceholder: isDarkMode ? "#808080" : "#6b7280",
         colorBorder: isDarkMode ? "#404040" : "#d1d5db",
       },
@@ -486,7 +505,7 @@ const Profile = () => {
                                 label: "Delete",
                                 icon: <DeleteOutlined />,
                                 danger: true,
-                                onClick: () => handleDeletePoem(poem.id),
+                                onClick: () => showDeleteConfirm(poem),
                               },
                             ]}
                           />
@@ -893,6 +912,91 @@ const Profile = () => {
                 </Space>
               </Form.Item>
             </Form>
+          </div>
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          open={isDeleteModalVisible}
+          onCancel={handleDeleteCancel}
+          footer={null}
+          width={400}
+          style={{ top: 20 }}
+          bodyStyle={{
+            padding: "24px",
+            borderRadius: "12px",
+            background: isDarkMode ? "#1a1a1a" : "#ffffff",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          }}
+          transitionName="ant-fade"
+        >
+          <div style={{ textAlign: "center" }}>
+            <ExclamationCircleOutlined
+              style={{
+                fontSize: "48px",
+                color: "#ef4444",
+                marginBottom: "16px",
+              }}
+            />
+            <Title
+              level={4}
+              style={{
+                color: isDarkMode ? "#ffffff" : "#1f2937",
+                marginBottom: "8px",
+              }}
+            >
+              Are you sure?
+            </Title>
+            <Text
+              style={{
+                color: isDarkMode ? "#d1d5db" : "#4b5563",
+                display: "block",
+                marginBottom: "24px",
+              }}
+            >
+              Do you really want to delete the poem "{poemToDelete?.title}"? This action cannot be undone.
+            </Text>
+            <Space size="middle">
+              <Button
+                onClick={handleDeleteCancel}
+                style={{
+                  borderRadius: "8px",
+                  padding: "6px 20px",
+                  fontSize: "14px",
+                  color: isDarkMode ? "#e5e7eb" : "#1f2937",
+                  borderColor: isDarkMode ? "#404040" : "#d1d5db",
+                  background: "transparent",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#6d28d9";
+                  e.currentTarget.style.color = "#6d28d9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = isDarkMode ? "#404040" : "#d1d5db";
+                  e.currentTarget.style.color = isDarkMode ? "#e5e7eb" : "#1f2937";
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteConfirm}
+                style={{
+                  borderRadius: "8px",
+                  padding: "6px 20px",
+                  fontSize: "14px",
+                  background: "#ef4444",
+                  color: "#ffffff", // Ensure text is white for contrast
+                  border: "none",
+                  boxShadow: "0 4px 15px rgba(239, 68, 68, 0.3)",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              >
+                Delete
+              </Button>
+            </Space>
           </div>
         </Modal>
       </Layout>

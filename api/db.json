@@ -15,6 +15,20 @@
       "password": "sajesh@123",
       "confirm": "sajesh@123",
       "agreement": true
+    },
+    {
+      "id": "03e9",
+      "username": "sudip",
+      "email": "Sudip@gmail.com",
+      "password": "$2b$10$diNtGRMbLokSFDPY.JMfc.YLOE1RjfgzOoOLOzN62F/pex8eB.qLm",
+      "agreement": true
+    },
+    {
+      "id": "e348",
+      "username": "test",
+      "email": "test@gmail.com",
+      "password": "$2b$10$LMShfPsWagg6pbf5PegJ.u1TRlWKKJ8VpuwpS7/XFOA7JF/NBvmre",
+      "agreement": true
     }
   ],
   "poems": [
@@ -94,90 +108,6 @@
       ]
     },
     {
-      "id": "6",
-      "title": "hi",
-      "author": "John Doe",
-      "authorUsername": "@johndoe",
-      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
-      "content": "hi",
-      "timestamp": "Just now",
-      "likes": 0,
-      "category": "Love",
-      "tags": [
-        "Love"
-      ]
-    },
-    {
-      "id": "b10a",
-      "title": "hi",
-      "author": "Sujal",
-      "authorUsername": "@sujal",
-      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
-      "content": "hifhhdgdfdsfzs sdf sd fsdf sd",
-      "timestamp": "Just now",
-      "likes": 0,
-      "category": "Love",
-      "tags": "Life hrlp"
-    },
-    {
-      "id": "6a88",
-      "title": "hello",
-      "author": "User",
-      "authorUsername": "@user09b5",
-      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
-      "content": "cfg s sag sg  gag fgds gdsf gdf gf gdf gdfg f  gf g gfg  afg fdg f afg fgdsfg ",
-      "timestamp": "Just now",
-      "likes": 0,
-      "category": "Love",
-      "tags": [
-        "Dreams"
-      ]
-    },
-    {
-      "id": "0e5a",
-      "title": "tret",
-      "author": "User",
-      "authorUsername": "@user09b5",
-      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
-      "content": "ertertert",
-      "timestamp": "Just now",
-      "likes": 0,
-      "category": "Love",
-      "tags": [
-        "Love"
-      ]
-    },
-    {
-      "id": "3152",
-      "title": "hello",
-      "author": "sujal",
-      "authorUsername": "sujal",
-      "content": "hello",
-      "timestamp": "Just now",
-      "likes": 0,
-      "category": "Inspirational",
-      "tags": [
-        "Life",
-        "Dreams",
-        "Love"
-      ],
-      "status": "draft",
-      "featured": false
-    },
-    {
-      "id": "3fc9",
-      "title": "sajesh",
-      "author": "sajesh",
-      "authorUsername": "sajesh",
-      "content": "sajesh",
-      "timestamp": "Just now",
-      "likes": 2,
-      "category": "Inspirational",
-      "tags": [
-        "Dreams"
-      ]
-    },
-    {
       "id": "8e6f",
       "title": "सोच र कार्यको सँकुचित लक्ष्य",
       "user_id": "b7f4",
@@ -185,7 +115,7 @@
       "authorUsername": "sajesh",
       "content": "सोच र कार्यको सँकुचित लक्ष्य छ! स्पर्शमा।\nसानो कदम चाले अवश्य छुन सकिन्छ चन्द्रमा।।\n\nजिम्मेवारीले तर्सीएर हिड्दै छाै सहकार्यको खोजमा।\nअपरिहार्य छ परिवर्तन तिम्रो त्यो सोच मा।।\n\nयेथेष्ट प्रेम काफी छ, अथाह त मात्र देखावटि\nभुल ती अतितका कुरा अनि छोड त्यो भबिस्यबाणी।।\n\nजरुरी छैन लुकाउन त्यो दुख अनि देखाउन त्यो वेदना।\nगल्ती नभए नि माफी लेउ, प्रकट गर्देउ त्यो कृतज्ञता।।",
       "timestamp": "Just now",
-      "likes": 2,
+      "likes": 3,
       "category": "Nature",
       "tags": [
         "Dreams",
@@ -195,35 +125,20 @@
       ]
     },
     {
-      "id": "d2d6",
-      "title": "asd",
-      "user_id": "b7f4",
-      "author": "sajesh1",
-      "authorUsername": "sajesh1",
-      "content": "asdas",
-      "timestamp": "Just now",
-      "likes": 2,
+      "id": "ac51",
+      "title": "Life of the coder",
+      "content": "they don't have those.",
       "category": "Inspirational",
-      "tags": [
-        "Dreams"
-      ]
-    },
-    {
-      "id": "cafa",
-      "title": "admin",
-      "content": "admin",
-      "category": "Nature",
       "tags": [
         "Nature"
       ],
       "status": "published",
-      "featured": true,
-      "user_id": "b7f4",
-      "author": "sajesh1",
-      "authorUsername": "sajesh1",
+      "user_id": "admin-001",
+      "author": "poemadmin",
+      "authorUsername": "poemadmin",
       "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
       "timestamp": "Just now",
-      "likes": 2
+      "likes": 0
     }
   ],
   "notifications": [

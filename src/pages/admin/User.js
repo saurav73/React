@@ -15,7 +15,6 @@ import {
   Divider,
   Avatar,
   Tooltip,
-  Switch,
   Popconfirm,
   message,
 } from "antd"
@@ -30,6 +29,53 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons"
 import axios from "axios"
+import Header from "../../components/Header"
+
+// Add custom CSS for the Popconfirm
+const customStyles = `
+  .custom-popconfirm .ant-popconfirm-inner-content {
+    padding: 16px !important;
+  }
+  .custom-popconfirm .ant-popconfirm-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    color: #333;
+  }
+  .custom-popconfirm .ant-popconfirm-message-icon {
+    font-size: 24px;
+    color: #ff4d4f !important;
+  }
+  .custom-popconfirm .ant-popconfirm-description {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+  }
+  .custom-popconfirm .ant-popconfirm-buttons {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .custom-popconfirm .ant-btn {
+    border-radius: 4px;
+    padding: 4px 16px;
+  }
+  .custom-popconfirm .ant-btn-default {
+    border-color: #d9d9d9;
+    color: #666;
+  }
+  .custom-popconfirm .ant-btn-primary {
+    background-color: #ff4d4f;
+    border-color: #ff4d4f;
+    color: white;
+  }
+  .custom-popconfirm .ant-btn-primary:hover {
+    background-color: #ff7875;
+    border-color: #ff7875;
+  }
+`
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -66,7 +112,6 @@ const Users = () => {
         return {
           ...user,
           poemCount: userPoems.length,
-          status: "active", // Assuming all users are active by default
           role: user.id === "09b5" ? "admin" : "user", // Just an example, adjust as needed
           avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? "men" : "women"}/${Math.floor(Math.random() * 50)}.jpg`,
           lastLogin: "Recently",
@@ -90,7 +135,6 @@ const Users = () => {
         username: user.username,
         email: user.email,
         role: user.role || "user",
-        status: user.status || "active",
       })
     } else {
       setIsEditMode(false)
@@ -129,7 +173,6 @@ const Users = () => {
         const enhancedNewUser = {
           ...response.data,
           poemCount: 0,
-          status: "active",
           role: values.role || "user",
           avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? "men" : "women"}/${Math.floor(Math.random() * 50)}.jpg`,
           lastLogin: "Just now",
@@ -155,14 +198,6 @@ const Users = () => {
       console.error("Error deleting user:", error)
       message.error("Failed to delete user")
     }
-  }
-
-  const handleStatusChange = (checked, userId) => {
-    const updatedUsers = users.map((user) =>
-      user.id === userId ? { ...user, status: checked ? "active" : "inactive" } : user,
-    )
-    setUsers(updatedUsers)
-    message.success(`User ${checked ? "activated" : "deactivated"} successfully`)
   }
 
   const filteredUsers = users.filter(
@@ -210,19 +245,6 @@ const Users = () => {
       },
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status, record) => (
-        <Switch
-          checked={status === "active"}
-          onChange={(checked) => handleStatusChange(checked, record.id)}
-          checkedChildren="Active"
-          unCheckedChildren="Inactive"
-        />
-      ),
-    },
-    {
       title: "Poems",
       dataIndex: "poemCount",
       key: "poemCount",
@@ -243,12 +265,21 @@ const Users = () => {
             />
           </Tooltip>
           <Popconfirm
-            title="Are you sure you want to delete this user?"
-            description="This action cannot be undone."
-            icon={<ExclamationCircleOutlined style={{ color: "red" }} />}
+            title={
+              <div>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>
+                  Confirm Deletion
+                </div>
+                <div style={{ marginTop: "8px", color: "#666" }}>
+                  Are you sure you want to delete the user <strong>{record.username}</strong>? This action cannot be undone.
+                </div>
+              </div>
+            }
+            icon={<ExclamationCircleOutlined />}
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Delete"
+            cancelText="Cancel"
+            overlayClassName="custom-popconfirm"
           >
             <Tooltip title="Delete User">
               <Button type="primary" danger shape="circle" icon={<DeleteOutlined />} size="small" />
@@ -260,118 +291,114 @@ const Users = () => {
   ]
 
   return (
-    <div className="users-container">
-      <Title level={2}>User Management</Title>
-      <Text type="secondary">Manage all users of the platform.</Text>
+    <>
+      <Header />
+      <div className="users-container">
+        <style>{customStyles}</style>
+        <Title level={2}>User Management</Title>
+        <Text type="secondary">Manage all users of the platform.</Text>
 
-      <Divider />
+        <Divider />
 
-      <Card>
-        <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-          <Input
-            placeholder="Search users..."
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
+        <Card>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+            <Input
+              placeholder="Search users..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 300 }}
+            />
+            <Button type="primary" icon={<UserAddOutlined />} onClick={() => showModal()}>
+              Add User
+            </Button>
+          </div>
+
+          <Table
+            columns={columns}
+            dataSource={filteredUsers}
+            rowKey="id"
+            loading={loading}
+            pagination={{ pageSize: 10 }}
           />
-          <Button type="primary" icon={<UserAddOutlined />} onClick={() => showModal()}>
-            Add User
-          </Button>
-        </div>
+        </Card>
 
-        <Table
-          columns={columns}
-          dataSource={filteredUsers}
-          rowKey="id"
-          loading={loading}
-          pagination={{ pageSize: 10 }}
-        />
-      </Card>
+        <Modal
+          title={isEditMode ? "Edit User" : "Add New User"}
+          open={isModalVisible}
+          onCancel={handleCancel}
+          footer={null}
+        >
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form.Item name="username" label="Username" rules={[{ required: true, message: "Please enter username" }]}>
+              <Input prefix={<UserOutlined />} placeholder="Enter username" />
+            </Form.Item>
 
-      <Modal
-        title={isEditMode ? "Edit User" : "Add New User"}
-        open={isModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item name="username" label="Username" rules={[{ required: true, message: "Please enter username" }]}>
-            <Input prefix={<UserOutlined />} placeholder="Enter username" />
-          </Form.Item>
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[
+                { required: true, message: "Please enter email" },
+                { type: "email", message: "Please enter a valid email" },
+              ]}
+            >
+              <Input prefix={<MailOutlined />} placeholder="Enter email" />
+            </Form.Item>
 
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Please enter email" },
-              { type: "email", message: "Please enter a valid email" },
-            ]}
-          >
-            <Input prefix={<MailOutlined />} placeholder="Enter email" />
-          </Form.Item>
+            {!isEditMode && (
+              <>
+                <Form.Item
+                  name="password"
+                  label="Password"
+                  rules={[{ required: true, message: "Please enter password" }]}
+                >
+                  <Input.Password prefix={<LockOutlined />} placeholder="Enter password" />
+                </Form.Item>
 
-          {!isEditMode && (
-            <>
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[{ required: true, message: "Please enter password" }]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="Enter password" />
-              </Form.Item>
+                <Form.Item
+                  name="confirm"
+                  label="Confirm Password"
+                  dependencies={["password"]}
+                  rules={[
+                    { required: true, message: "Please confirm password" },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue("password") === value) {
+                          return Promise.resolve()
+                        }
+                        return Promise.reject(new Error("The two passwords do not match"))
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" />
+                </Form.Item>
+              </>
+            )}
 
-              <Form.Item
-                name="confirm"
-                label="Confirm Password"
-                dependencies={["password"]}
-                rules={[
-                  { required: true, message: "Please confirm password" },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("password") === value) {
-                        return Promise.resolve()
-                      }
-                      return Promise.reject(new Error("The two passwords do not match"))
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" />
-              </Form.Item>
-            </>
-          )}
+            <Form.Item name="role" label="Role" rules={[{ required: true, message: "Please select a role" }]}>
+              <Select placeholder="Select a role">
+                <Option value="admin">Admin</Option>
+                <Option value="editor">Editor</Option>
+                <Option value="user">User</Option>
+              </Select>
+            </Form.Item>
 
-          <Form.Item name="role" label="Role" rules={[{ required: true, message: "Please select a role" }]}>
-            <Select placeholder="Select a role">
-              <Option value="admin">Admin</Option>
-              <Option value="editor">Editor</Option>
-              <Option value="user">User</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="status" label="Status" rules={[{ required: true, message: "Please select a status" }]}>
-            <Select placeholder="Select a status">
-              <Option value="active">Active</Option>
-              <Option value="inactive">Inactive</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button style={{ marginRight: 8 }} onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit">
-                {isEditMode ? "Update" : "Add"}
-              </Button>
-            </div>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+            <Form.Item>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button style={{ marginRight: 8 }} onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="primary" htmlType="submit">
+                  {isEditMode ? "Update" : "Add"}
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
+    </>
   )
 }
 
-export default Users
-
+export default Users  

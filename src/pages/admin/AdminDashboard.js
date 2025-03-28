@@ -26,6 +26,7 @@ import {
 } from "@ant-design/icons";
 import { getPoems } from "../../utils/poem.util";
 import axios from "axios";
+import Header from "../../components/Header";
 
 const { Title, Text } = Typography;
 
@@ -174,7 +175,10 @@ const Dashboard = () => {
   ];
 
   return (
+    <>
+    <Header />
     <div className="dashboard-container">
+     
       <Title level={2}>Dashboard</Title>
       <Text type="secondary">Welcome to the admin dashboard. Here's an overview of your platform.</Text>
       
@@ -298,6 +302,7 @@ const Dashboard = () => {
         </Col>
       </Row>
     </div>
+    </>
   );
 };
 

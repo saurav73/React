@@ -1,7 +1,5 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
-import { useEffect, useState } from "react";
-
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -9,48 +7,55 @@ import {
   LogoutOutlined,
   DashboardOutlined,
   SettingOutlined,
-
+  BookOutlined,
+  AdminOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme } from "antd";
+import { Button, Layout, Menu, theme, Typography } from "antd";
 import { UserContext } from "../context/user.context";
 
 const { Header, Sider, Content } = Layout;
-
-
-
+const { Title } = Typography;
 
 const CustomLayout = () => {
   const { _user } = useContext(UserContext);
-
   const navigate = useNavigate();
+  
   useEffect(() => {
     const isLogin = localStorage.getItem("is_login");
-    if (isLogin!=="1") {
+    if (isLogin !== "1") {
       navigate("/");
     }
-  }, 
-  []);
+  }, []);
+  
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  return (
-  //   <>
-  //   <Header />
-  //   <div className="v-row container">
-  //     <Sidebar />
-  //     <div className="v-col content">
-  //       <Outlet />
-  //     </div>
-  //   </div>
-  //   <Footer />
-  // </>
   
-  <Layout>
-    
-      <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div className="demo-logo-vertical" />
-        <img src="https://www.virinchicollege.edu.np/storage/site/941680252040.png" alt="logo" style={{height: 90, padding: 25}} />
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider 
+        trigger={null} 
+        collapsible 
+        collapsed={collapsed}
+        style={{
+          overflow: 'auto',
+          height: '100vh',
+          position: 'fixed',  // Makes the sidebar sticky
+          left: 0,
+          top: 0,
+          bottom: 0,
+        }}
+      >
+        <div className="logo" style={{ padding: collapsed ? "16px 0" : "16px", textAlign: "center" }}>
+          {collapsed ? (
+            <BookOutlined style={{ fontSize: 24, color: "white" }} />
+          ) : (
+            <Title level={4} style={{ color: "white", margin: "16px 0" }}>
+            <BookOutlined style={{ marginRight: 8 }} />
+            </Title>
+          )}
+        </div>
         
         <Menu
           theme="dark"
@@ -71,7 +76,7 @@ const CustomLayout = () => {
             },
             {
               key: "4",
-              icon: <SettingOutlined />,
+              icon: <BookOutlined />,
               label: "Poems",
               onClick: () => navigate("/admin/setting"),
             },
@@ -84,11 +89,15 @@ const CustomLayout = () => {
                 navigate("/");
               }
             },
-            
           ]}
         />
       </Sider>
-      <Layout>
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 200, // Adjust content margin based on sidebar width
+          transition: 'margin-left 0.2s', // Smooth transition when collapsing
+        }}
+      >
         <Header style={{ padding: 0, background: colorBgContainer }}>
           <Button
             type="text"
@@ -114,7 +123,7 @@ const CustomLayout = () => {
         </Content>
       </Layout>
     </Layout>
-  )
-}
+  );
+};
 
 export default CustomLayout;
