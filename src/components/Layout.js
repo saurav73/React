@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useContext } from "react"
 import { Outlet, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 
@@ -12,6 +12,7 @@ import {
 
 } from "@ant-design/icons";
 import { Button, Layout, Menu, theme } from "antd";
+import { UserContext } from "../context/user.context";
 
 const { Header, Sider, Content } = Layout;
 
@@ -19,6 +20,7 @@ const { Header, Sider, Content } = Layout;
 
 
 const CustomLayout = () => {
+  const { _user } = useContext(UserContext);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -48,6 +50,8 @@ const CustomLayout = () => {
     
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="demo-logo-vertical" />
+        <img src="https://www.virinchicollege.edu.np/storage/site/941680252040.png" alt="logo" style={{height: 90, padding: 25}} />
+        
         <Menu
           theme="dark"
           mode="inline"

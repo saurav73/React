@@ -30,8 +30,8 @@ const UserDetails = (props) => {
     
     <Card title="users Details" bordered={false} style={{ width: 800, margin: '0 auto' }}>
       <Descriptions bordered layout="horizontal">
-        <Descriptions.Item label="First Name" span={3}>{users.firstName}</Descriptions.Item>
-        <Descriptions.Item label="Last Name" span={3}>{users.lastName}</Descriptions.Item>
+        <Descriptions.Item label="Full Name" span={3}>{users.fullname}</Descriptions.Item>
+        <Descriptions.Item label="Email" span={3}>{users.email}</Descriptions.Item>
         <Descriptions.Item label="Age" span={3}>{users.age}</Descriptions.Item>
         <Descriptions.Item label="Address" span={3}>{users.address}</Descriptions.Item>
 

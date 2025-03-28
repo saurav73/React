@@ -1,61 +1,248 @@
 {
   "users": [
     {
-      "id": "1fba637ab-daba-4512-8d21-2f7c057a53f9",
-      "firstName": "John",
-      "lastName": "Brown",
-      "age": 32,
-      "address": "New York No. 1 Lake Park",
-      "tags": [
-        "nice",
-        "developer"
-      ],
-      "role": "admin",
-      "email": "yijojo7993@owlny.com"
+      "id": "09b5",
+      "username": "sujal",
+      "email": "sujal12@gmail.com",
+      "password": "sujal@123",
+      "confirm": "sujal@123",
+      "agreement": true
     },
     {
-      "id": "aa1e2a85-3306-4f16-92ac-79832ee76a7d",
-      "firstName": "Jim",
-      "lastName": "Green",
-      "age": 42,
-      "address": "London No. 1 Lake Park",
-      "tags": [
-        "loser"
-      ],
-      "role": "users"
+      "id": "2053",
+      "username": "test1",
+      "email": "test1@gmail.com",
+      "password": "test@123",
+      "confirm": "test@123",
+      "agreement": true
     },
     {
-      "id": "1e51f58b-72bd-4c36-b972-67b22e1d25c1",
-      "firstName": "John",
-      "lastName": "Brown",
-      "age": 32,
-      "address": "New York No. 1 Lake Park",
+      "id": "b7f4",
+      "username": "sajesh1",
+      "email": "sajesh@gmail.com",
+      "password": "sajesh@123",
+      "confirm": "sajesh@123",
+      "agreement": true
+    }
+  ],
+  "poems": [
+    {
+      "id": "1",
+      "title": "The Road Not Taken",
+      "author": "Robert Frost",
+      "authorUsername": "@rfrost",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/32.jpg",
+      "content": "Two roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth",
+      "timestamp": "2 hours ago",
+      "likes": 245,
+      "category": "Classic",
       "tags": [
-        "nice",
-        "developer"
-      ],
-      "role": "admin"
+        "Nature",
+        "Life Choices"
+      ]
     },
     {
-      "id": "2ae8dafd-f0f5-48ca-a26c-09f69c13c10f",
-      "firstName": "Jim",
-      "lastName": "Green",
-      "age": 42,
-      "address": "London No. 1 Lake Park",
+      "id": "2",
+      "title": "Fire and Ice",
+      "author": "Robert Frost",
+      "authorUsername": "@rfrost",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/32.jpg",
+      "content": "Some say the world will end in fire,\nSome say in ice.\nFrom what I've tasted of desire\nI hold with those who favor fire.\nBut if it had to perish twice,\nI think I know enough of hate\nTo say that for destruction ice\nIs also great\nAnd would suffice.",
+      "timestamp": "5 hours ago",
+      "likes": 189,
+      "category": "Classic",
       "tags": [
-        "loser"
-      ],
-      "role": "users"
+        "Apocalypse",
+        "Desire"
+      ]
     },
     {
-      "id": "dc90",
-      "firstName": "John chamling",
-      "lastname": "",
-      "age": "237",
-      "email": "yijojo7993@owlny.com",
-      "phone": "9841",
-      "address": "iss vanxu",
-      "role": "chup"
+      "id": "3",
+      "title": "Hope is the thing with feathers",
+      "author": "Emily Dickinson",
+      "authorUsername": "@edickinson",
+      "authorAvatar": "https://randomuser.me/api/portraits/women/32.jpg",
+      "content": "\"Hope\" is the thing with feathers -\nThat perches in the soul -\nAnd sings the tune without the words -\nAnd never stops - at all -",
+      "timestamp": "1 day ago",
+      "likes": 312,
+      "category": "Inspirational",
+      "tags": [
+        "Hope",
+        "Resilience"
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Dreams",
+      "author": "Langston Hughes",
+      "authorUsername": "@lhughes",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/42.jpg",
+      "content": "Hold fast to dreams\nFor if dreams die\nLife is a broken-winged bird\nThat cannot fly.\nHold fast to dreams\nFor when dreams go\nLife is a barren field\nFrozen with snow.",
+      "timestamp": "2 days ago",
+      "likes": 276,
+      "category": "Inspirational",
+      "tags": [
+        "Dreams",
+        "Aspiration"
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Sonnet 18",
+      "author": "William Shakespeare",
+      "authorUsername": "@wshakespeare",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/52.jpg",
+      "content": "Shall I compare thee to a summer's day?\nThou art more lovely and more temperate:\nRough winds do shake the darling buds of May,\nAnd summer's lease hath all too short a date:",
+      "timestamp": "3 days ago",
+      "likes": 423,
+      "category": "Love",
+      "tags": [
+        "Romance",
+        "Beauty"
+      ]
+    },
+    {
+      "id": "6",
+      "title": "hi",
+      "author": "John Doe",
+      "authorUsername": "@johndoe",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "content": "hi",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Love",
+      "tags": [
+        "Love"
+      ]
+    },
+    {
+      "id": "b10a",
+      "title": "hi",
+      "author": "Sujal",
+      "authorUsername": "@sujal",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "content": "hifhhdgdfdsfzs sdf sd fsdf sd",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Love",
+      "tags": "Life hrlp"
+    },
+    {
+      "id": "6a88",
+      "title": "hello",
+      "author": "User",
+      "authorUsername": "@user09b5",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "content": "cfg s sag sg  gag fgds gdsf gdf gf gdf gdfg f  gf g gfg  afg fdg f afg fgdsfg ",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Love",
+      "tags": [
+        "Dreams"
+      ]
+    },
+    {
+      "id": "0e5a",
+      "title": "tret",
+      "author": "User",
+      "authorUsername": "@user09b5",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "content": "ertertert",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Love",
+      "tags": [
+        "Love"
+      ]
+    },
+    {
+      "id": "3152",
+      "title": "hello",
+      "author": "sujal",
+      "authorUsername": "sujal",
+      "content": "hello",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Inspirational",
+      "tags": [
+        "Life",
+        "Dreams",
+        "Love"
+      ]
+    },
+    {
+      "id": "3fc9",
+      "title": "sajesh",
+      "author": "sajesh",
+      "authorUsername": "sajesh",
+      "content": "sajesh",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Inspirational",
+      "tags": [
+        "Dreams"
+      ]
+    },
+    {
+      "id": "8e6f",
+      "title": "सोच र कार्यको सँकुचित लक्ष्य",
+      "user_id": "b7f4",
+      "author": "sajesh",
+      "authorUsername": "sajesh",
+      "content": "सोच र कार्यको सँकुचित लक्ष्य छ! स्पर्शमा।\nसानो कदम चाले अवश्य छुन सकिन्छ चन्द्रमा।।\n\nजिम्मेवारीले तर्सीएर हिड्दै छाै सहकार्यको खोजमा।\nअपरिहार्य छ परिवर्तन तिम्रो त्यो सोच मा।।\n\nयेथेष्ट प्रेम काफी छ, अथाह त मात्र देखावटि\nभुल ती अतितका कुरा अनि छोड त्यो भबिस्यबाणी।।\n\nजरुरी छैन लुकाउन त्यो दुख अनि देखाउन त्यो वेदना।\nगल्ती नभए नि माफी लेउ, प्रकट गर्देउ त्यो कृतज्ञता।।",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Nature",
+      "tags": [
+        "Dreams",
+        "Hope",
+        "Nature",
+        "Life"
+      ]
+    },
+    {
+      "id": "d2d6",
+      "title": "asd",
+      "user_id": "b7f4",
+      "author": "sajesh1",
+      "authorUsername": "sajesh1",
+      "content": "asdas",
+      "timestamp": "Just now",
+      "likes": 0,
+      "category": "Inspirational",
+      "tags": [
+        "Dreams"
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "message": "Your poem 'The Road Not Taken' received a new like!",
+      "timestamp": "5 mins ago",
+      "userId": "09b5",
+      "read": false
+    },
+    {
+      "id": "2",
+      "message": "Emily Dickinson commented on your poem.",
+      "timestamp": "1 hour ago",
+      "userId": "09b5",
+      "read": false
+    },
+    {
+      "id": "3",
+      "message": "New follower: @wshakespeare",
+      "timestamp": "2 hours ago",
+      "userId": "09b5",
+      "read": false
+    },
+    {
+      "id": "4",
+      "message": "Your poem 'Dreams' was shared by @lhughes.",
+      "timestamp": "1 day ago",
+      "userId": "09b5",
+      "read": false
     }
   ]
 }
