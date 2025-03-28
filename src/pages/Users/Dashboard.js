@@ -21,6 +21,7 @@ import {
   Badge,
   Drawer,
   Checkbox,
+  Spin,
 } from "antd"
 import {
   BookOutlined,
@@ -31,7 +32,6 @@ import {
   LogoutOutlined,
   BellOutlined,
   SearchOutlined,
-  SettingOutlined,
   HomeOutlined,
   FireOutlined,
   StarOutlined,
@@ -45,7 +45,19 @@ import {
 } from "@ant-design/icons"
 import { Link, useNavigate } from "react-router-dom"
 import { UserContext } from "../../context/user.context"
-import { createPoem, deletePoem, getPoems, updatePoem, getNotifications, createNotification, updateNotification, deleteNotification } from "../../utils/poem.util"
+import {
+  createPoem,
+  deletePoem,
+  getPoems,
+  updatePoem,
+  getNotifications,
+  createNotification,
+  updateNotification,
+  deleteNotification,
+  likePoem,
+  unlikePoem,
+  getPoem,
+} from "../../utils/poem.util"
 import { showErrorToast, showSuccessToast } from "../../utils/toastify.util"
 import { getUser } from "../../utils/user.util"
 
@@ -57,7 +69,7 @@ const { Option } = Select
 const Dashboard = () => {
   const { _user, _setUser } = useContext(UserContext)
   const [isDarkMode, setIsDarkMode] = useState(
-    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches,
   )
   const [collapsed, setCollapsed] = useState(false)
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
@@ -68,11 +80,14 @@ const Dashboard = () => {
   const [isEditNotificationModalVisible, setIsEditNotificationModalVisible] = useState(false)
   const [likedPoems, setLikedPoems] = useState({})
   const [poems, setPoems] = useState([])
+  const [filteredPoems, setFilteredPoems] = useState([])
   const [notifications, setNotifications] = useState([])
   const [currentPoem, setCurrentPoem] = useState(null)
   const [currentNotification, setCurrentNotification] = useState(null)
   const [user, setUser] = useState(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
+  const [isLoadingPoems, setIsLoadingPoems] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
   const [form] = Form.useForm()
   const [editForm] = Form.useForm()
   const [notificationForm] = Form.useForm()
@@ -124,13 +139,50 @@ const Dashboard = () => {
 
   // Fetch poems on mount
   useEffect(() => {
+    setIsLoadingPoems(true)
     getPoems()
-      .then((data) => setPoems(data))
+      .then((data) => {
+        setPoems(data)
+        setFilteredPoems(data)
+
+        // Initialize liked poems from localStorage if available
+        const storedLikes = localStorage.getItem("likedPoems")
+        if (storedLikes) {
+          setLikedPoems(JSON.parse(storedLikes))
+        }
+      })
       .catch((error) => {
         console.error("Error fetching poems:", error)
         message.error("Failed to fetch poems")
       })
+      .finally(() => setIsLoadingPoems(false))
   }, [])
+
+  // Filter poems when category or search query changes
+  useEffect(() => {
+    if (poems.length === 0) return
+
+    let filtered = [...poems]
+
+    // Filter by category
+    if (activeCategory !== "all") {
+      filtered = filtered.filter((poem) => poem.category?.toLowerCase() === activeCategory.toLowerCase())
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(
+        (poem) =>
+          poem.title?.toLowerCase().includes(query) ||
+          poem.content?.toLowerCase().includes(query) ||
+          poem.author?.toLowerCase().includes(query) ||
+          (Array.isArray(poem.tags) && poem.tags.some((tag) => tag.toLowerCase().includes(query))),
+      )
+    }
+
+    setFilteredPoems(filtered)
+  }, [activeCategory, searchQuery, poems])
 
   // Fetch notifications on mount
   useEffect(() => {
@@ -157,11 +209,44 @@ const Dashboard = () => {
     if (windowWidth >= 768) setMobileMenuVisible(false)
   }, [windowWidth])
 
+  // Save liked poems to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("likedPoems", JSON.stringify(likedPoems))
+  }, [likedPoems])
+
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode)
-  const toggleLike = (poemId) => setLikedPoems((prev) => ({ ...prev, [poemId]: !prev[poemId] }))
+
+  const toggleLike = async (poemId) => {
+    try {
+      const isLiked = likedPoems[poemId]
+
+      if (isLiked) {
+        // Unlike the poem
+        await unlikePoem(poemId)
+        setLikedPoems((prev) => ({ ...prev, [poemId]: false }))
+      } else {
+        // Like the poem
+        await likePoem(poemId)
+        setLikedPoems((prev) => ({ ...prev, [poemId]: true }))
+      }
+
+      // Update the poems state with the new like count
+      const updatedPoem = await getPoem(poemId)
+      setPoems((prevPoems) => prevPoems.map((poem) => (poem.id === poemId ? updatedPoem : poem)))
+
+      message.success(isLiked ? "Removed like" : "Added like")
+    } catch (error) {
+      console.error("Error toggling like:", error)
+      message.error("Failed to update like")
+    }
+  }
+
   const isMobile = windowWidth < 768
 
-  // Poem Modal Handlers
+  const handleSearch = (value) => {
+    setSearchQuery(value)
+  }
+
   const showModal = () => setIsModalVisible(true)
   const showEditModal = (poem) => {
     setCurrentPoem(poem)
@@ -321,11 +406,6 @@ const Dashboard = () => {
       })
   }
 
-  const filteredPoems =
-    activeCategory === "all"
-      ? poems
-      : poems.filter((poem) => poem.category.toLowerCase() === activeCategory.toLowerCase())
-
   const { defaultAlgorithm, darkAlgorithm } = antTheme
   const customTheme = {
     token: {
@@ -455,11 +535,7 @@ const Dashboard = () => {
                   }
                   trigger={["click"]}
                 >
-                  <Button
-                    type="text"
-                    icon={<MoreOutlined />}
-                    style={{ color: isDarkMode ? "#757575" : "#6b7280" }}
-                  />
+                  <Button type="text" icon={<MoreOutlined />} style={{ color: isDarkMode ? "#757575" : "#6b7280" }} />
                 </Dropdown>
               </div>
             </Menu.Item>
@@ -566,6 +642,23 @@ const Dashboard = () => {
               )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: 1, justifyContent: "center" }}>
+              <Input
+                placeholder="Search poems..."
+                prefix={<SearchOutlined style={{ color: "#6d28d9" }} />}
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{
+                  width: isMobile ? "100%" : "300px",
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  marginRight: "16px",
+                  background: isDarkMode ? "#333333" : "#f9fafb",
+                  border: `1px solid ${isDarkMode ? "#616161" : "#d1d5db"}`,
+                  transition: "all 0.3s ease",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
+                onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
+              />
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
@@ -686,6 +779,8 @@ const Dashboard = () => {
               <Input
                 prefix={<SearchOutlined style={{ color: "#6d28d9" }} />}
                 placeholder="Search poems..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
                 style={{ borderRadius: "8px" }}
               />
             </div>
@@ -723,7 +818,12 @@ const Dashboard = () => {
                   Discover and share beautiful poetry
                 </Text>
               </div>
-              {filteredPoems.length > 0 ? (
+
+              {isLoadingPoems ? (
+                <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+                  <Spin size="large" />
+                </div>
+              ) : filteredPoems.length > 0 ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                   {filteredPoems.map((poem) => (
                     <Card
@@ -811,7 +911,7 @@ const Dashboard = () => {
                           onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
                           onMouseLeave={(e) => (e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#4b5563")}
                         >
-                          {likedPoems[poem.id] ? poem.likes + 1 : poem.likes}
+                          {poem.likes || 0}
                         </Button>
                       </div>
                     </Card>
@@ -819,7 +919,9 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div style={{ margin: "40px 0", textAlign: "center" }}>
-                  <Text style={{ color: isDarkMode ? "#757575" : "#6b7280" }}>No poems found in this category</Text>
+                  <Text style={{ color: isDarkMode ? "#757575" : "#6b7280" }}>
+                    {searchQuery ? "No poems found matching your search" : "No poems found in this category"}
+                  </Text>
                 </div>
               )}
             </div>
@@ -843,39 +945,70 @@ const Dashboard = () => {
           footer={null}
           width={600}
           style={{ top: 20 }}
-          bodyStyle={{ padding: "24px", borderRadius: "12px", background: isDarkMode ? "#212121" : "#ffffff", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}
+          bodyStyle={{
+            padding: "24px",
+            borderRadius: "12px",
+            background: isDarkMode ? "#212121" : "#ffffff",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          }}
           transitionName="ant-fade"
         >
           <div style={{ padding: "8px 0" }}>
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
               <Form.Item
                 name="title"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Title</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Title
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please enter a title for your poem" }]}
               >
                 <Input
                   placeholder="Enter the title of your poem"
-                  style={{ borderRadius: "8px", padding: "10px 12px", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="content"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Content</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Content
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please enter your poem content" }]}
               >
                 <TextArea
                   placeholder="Write your poem here..."
                   rows={6}
-                  style={{ borderRadius: "8px", padding: "12px", fontFamily: "'Georgia', serif", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease", resize: "none" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "12px",
+                    fontFamily: "'Georgia', serif",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                    resize: "none",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="category"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Category</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Category
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please select a category" }]}
               >
                 <Select
@@ -883,16 +1016,22 @@ const Dashboard = () => {
                   style={{ borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
                   dropdownStyle={{ borderRadius: "8px", background: isDarkMode ? "#333333" : "#ffffff" }}
                 >
-                  {categories.filter((cat) => cat.id !== "all").map((category) => (
-                    <Option key={category.id} value={category.name}>
-                      {category.name}
-                    </Option>
-                  ))}
+                  {categories
+                    .filter((cat) => cat.id !== "all")
+                    .map((category) => (
+                      <Option key={category.id} value={category.name}>
+                        {category.name}
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
               <Form.Item
                 name="tags"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Tags</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Tags
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please add at least one tag" }]}
               >
                 <Select
@@ -912,16 +1051,38 @@ const Dashboard = () => {
                 <Space size="middle">
                   <Button
                     onClick={handleCancel}
-                    style={{ borderRadius: "8px", padding: "6px 20px", fontSize: "14px", color: isDarkMode ? "#e0e0e0" : "#1f2937", borderColor: isDarkMode ? "#616161" : "#d1d5db", background: "transparent", transition: "all 0.3s ease" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#6d28d9"; e.currentTarget.style.color = "#6d28d9" }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"; e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937" }}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      color: isDarkMode ? "#e0e0e0" : "#1f2937",
+                      borderColor: isDarkMode ? "#616161" : "#d1d5db",
+                      background: "transparent",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "#6d28d9"
+                      e.currentTarget.style.color = "#6d28d9"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"
+                      e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937"
+                    }}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="primary"
                     htmlType="submit"
-                    style={{ background: "linear-gradient(90deg, #6d28d9, #a78bfa)", border: "none", boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)", borderRadius: "8px", padding: "6px 20px", fontSize: "14px", transition: "all 0.3s ease" }}
+                    style={{
+                      background: "linear-gradient(90deg, #6d28d9, #a78bfa)",
+                      border: "none",
+                      boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)",
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      transition: "all 0.3s ease",
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                     onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   >
@@ -944,39 +1105,70 @@ const Dashboard = () => {
           footer={null}
           width={600}
           style={{ top: 20 }}
-          bodyStyle={{ padding: "24px", borderRadius: "12px", background: isDarkMode ? "#212121" : "#ffffff", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}
+          bodyStyle={{
+            padding: "24px",
+            borderRadius: "12px",
+            background: isDarkMode ? "#212121" : "#ffffff",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          }}
           transitionName="ant-fade"
         >
           <div style={{ padding: "8px 0" }}>
             <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
               <Form.Item
                 name="title"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Title</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Title
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please enter a title for your poem" }]}
               >
                 <Input
                   placeholder="Enter the title of your poem"
-                  style={{ borderRadius: "8px", padding: "10px 12px", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="content"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Content</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Content
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please enter your poem content" }]}
               >
                 <TextArea
                   placeholder="Write your poem here..."
                   rows={6}
-                  style={{ borderRadius: "8px", padding: "12px", fontFamily: "'Georgia', serif", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease", resize: "none" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "12px",
+                    fontFamily: "'Georgia', serif",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                    resize: "none",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="category"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Category</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Category
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please select a category" }]}
               >
                 <Select
@@ -984,16 +1176,22 @@ const Dashboard = () => {
                   style={{ borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
                   dropdownStyle={{ borderRadius: "8px", background: isDarkMode ? "#333333" : "#ffffff" }}
                 >
-                  {categories.filter((cat) => cat.id !== "all").map((category) => (
-                    <Option key={category.id} value={category.name}>
-                      {category.name}
-                    </Option>
-                  ))}
+                  {categories
+                    .filter((cat) => cat.id !== "all")
+                    .map((category) => (
+                      <Option key={category.id} value={category.name}>
+                        {category.name}
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
               <Form.Item
                 name="tags"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Tags</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Tags
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please add at least one tag" }]}
               >
                 <Select
@@ -1013,16 +1211,38 @@ const Dashboard = () => {
                 <Space size="middle">
                   <Button
                     onClick={handleEditCancel}
-                    style={{ borderRadius: "8px", padding: "6px 20px", fontSize: "14px", color: isDarkMode ? "#e0e0e0" : "#1f2937", borderColor: isDarkMode ? "#616161" : "#d1d5db", background: "transparent", transition: "all 0.3s ease" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#6d28d9"; e.currentTarget.style.color = "#6d28d9" }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"; e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937" }}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      color: isDarkMode ? "#e0e0e0" : "#1f2937",
+                      borderColor: isDarkMode ? "#616161" : "#d1d5db",
+                      background: "transparent",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "#6d28d9"
+                      e.currentTarget.style.color = "#6d28d9"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"
+                      e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937"
+                    }}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="primary"
                     htmlType="submit"
-                    style={{ background: "linear-gradient(90deg, #6d28d9, #a78bfa)", border: "none", boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)", borderRadius: "8px", padding: "6px 20px", fontSize: "14px", transition: "all 0.3s ease" }}
+                    style={{
+                      background: "linear-gradient(90deg, #6d28d9, #a78bfa)",
+                      border: "none",
+                      boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)",
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      transition: "all 0.3s ease",
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                     onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   >
@@ -1045,38 +1265,67 @@ const Dashboard = () => {
           footer={null}
           width={600}
           style={{ top: 20 }}
-          bodyStyle={{ padding: "24px", borderRadius: "12px", background: isDarkMode ? "#212121" : "#ffffff", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}
+          bodyStyle={{
+            padding: "24px",
+            borderRadius: "12px",
+            background: isDarkMode ? "#212121" : "#ffffff",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          }}
           transitionName="ant-fade"
         >
           <div style={{ padding: "8px 0" }}>
             <Form form={notificationForm} layout="vertical" onFinish={handleNotificationSubmit}>
               <Form.Item
                 name="message"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Message</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Message
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please enter the notification message" }]}
               >
                 <Input
                   placeholder="Enter the notification message"
-                  style={{ borderRadius: "8px", padding: "10px 12px", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="timestamp"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Timestamp</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Timestamp
+                  </Text>
+                }
                 initialValue="Just now"
               >
                 <Input
                   placeholder="Enter the timestamp (e.g., 5 mins ago)"
-                  style={{ borderRadius: "8px", padding: "10px 12px", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="read"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Read Status</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Read Status
+                  </Text>
+                }
                 valuePropName="checked"
               >
                 <Checkbox style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Mark as Read</Checkbox>
@@ -1085,16 +1334,38 @@ const Dashboard = () => {
                 <Space size="middle">
                   <Button
                     onClick={handleNotificationCancel}
-                    style={{ borderRadius: "8px", padding: "6px 20px", fontSize: "14px", color: isDarkMode ? "#e0e0e0" : "#1f2937", borderColor: isDarkMode ? "#616161" : "#d1d5db", background: "transparent", transition: "all 0.3s ease" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#6d28d9"; e.currentTarget.style.color = "#6d28d9" }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"; e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937" }}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      color: isDarkMode ? "#e0e0e0" : "#1f2937",
+                      borderColor: isDarkMode ? "#616161" : "#d1d5db",
+                      background: "transparent",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "#6d28d9"
+                      e.currentTarget.style.color = "#6d28d9"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"
+                      e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937"
+                    }}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="primary"
                     htmlType="submit"
-                    style={{ background: "linear-gradient(90deg, #6d28d9, #a78bfa)", border: "none", boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)", borderRadius: "8px", padding: "6px 20px", fontSize: "14px", transition: "all 0.3s ease" }}
+                    style={{
+                      background: "linear-gradient(90deg, #6d28d9, #a78bfa)",
+                      border: "none",
+                      boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)",
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      transition: "all 0.3s ease",
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                     onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   >
@@ -1117,37 +1388,66 @@ const Dashboard = () => {
           footer={null}
           width={600}
           style={{ top: 20 }}
-          bodyStyle={{ padding: "24px", borderRadius: "12px", background: isDarkMode ? "#212121" : "#ffffff", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}
+          bodyStyle={{
+            padding: "24px",
+            borderRadius: "12px",
+            background: isDarkMode ? "#212121" : "#ffffff",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          }}
           transitionName="ant-fade"
         >
           <div style={{ padding: "8px 0" }}>
             <Form form={editNotificationForm} layout="vertical" onFinish={handleEditNotificationSubmit}>
               <Form.Item
                 name="message"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Message</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Message
+                  </Text>
+                }
                 rules={[{ required: true, message: "Please enter the notification message" }]}
               >
                 <Input
                   placeholder="Enter the notification message"
-                  style={{ borderRadius: "8px", padding: "10px 12px", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="timestamp"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Timestamp</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Timestamp
+                  </Text>
+                }
               >
                 <Input
                   placeholder="Enter the timestamp (e.g., 5 mins ago)"
-                  style={{ borderRadius: "8px", padding: "10px 12px", fontSize: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", transition: "all 0.3s ease" }}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    fontSize: "16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    transition: "all 0.3s ease",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "#6d28d9")}
                   onBlur={(e) => (e.target.style.borderColor = isDarkMode ? "#616161" : "#d1d5db")}
                 />
               </Form.Item>
               <Form.Item
                 name="read"
-                label={<Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Read Status</Text>}
+                label={
+                  <Text strong style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>
+                    Read Status
+                  </Text>
+                }
                 valuePropName="checked"
               >
                 <Checkbox style={{ color: isDarkMode ? "#e0e0e0" : "#1f2937" }}>Mark as Read</Checkbox>
@@ -1156,16 +1456,38 @@ const Dashboard = () => {
                 <Space size="middle">
                   <Button
                     onClick={handleEditNotificationCancel}
-                    style={{ borderRadius: "8px", padding: "6px 20px", fontSize: "14px", color: isDarkMode ? "#e0e0e0" : "#1f2937", borderColor: isDarkMode ? "#616161" : "#d1d5db", background: "transparent", transition: "all 0.3s ease" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#6d28d9"; e.currentTarget.style.color = "#6d28d9" }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"; e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937" }}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      color: isDarkMode ? "#e0e0e0" : "#1f2937",
+                      borderColor: isDarkMode ? "#616161" : "#d1d5db",
+                      background: "transparent",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "#6d28d9"
+                      e.currentTarget.style.color = "#6d28d9"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = isDarkMode ? "#616161" : "#d1d5db"
+                      e.currentTarget.style.color = isDarkMode ? "#e0e0e0" : "#1f2937"
+                    }}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="primary"
                     htmlType="submit"
-                    style={{ background: "linear-gradient(90deg, #6d28d9, #a78bfa)", border: "none", boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)", borderRadius: "8px", padding: "6px 20px", fontSize: "14px", transition: "all 0.3s ease" }}
+                    style={{
+                      background: "linear-gradient(90deg, #6d28d9, #a78bfa)",
+                      border: "none",
+                      boxShadow: "0 4px 15px rgba(109, 40, 217, 0.3)",
+                      borderRadius: "8px",
+                      padding: "6px 20px",
+                      fontSize: "14px",
+                      transition: "all 0.3s ease",
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                     onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   >
@@ -1182,3 +1504,4 @@ const Dashboard = () => {
 }
 
 export default Dashboard
+

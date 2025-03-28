@@ -72,7 +72,7 @@ const CustomLayout = () => {
             {
               key: "4",
               icon: <SettingOutlined />,
-              label: "Setting",
+              label: "Poems",
               onClick: () => navigate("/admin/setting"),
             },
             {

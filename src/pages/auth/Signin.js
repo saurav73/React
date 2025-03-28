@@ -172,9 +172,9 @@ const SignIn = () => {
                 <Form.Item name="remember" valuePropName="checked" noStyle>
                   <Checkbox style={{ color: isDarkMode ? "#d9d9d9" : "#666" }}>Remember me</Checkbox>
                 </Form.Item>
-                <Link to="/forgot-password" style={{ color: "#722ed1" }}>
+                {/* <Link to="/forgot-password" style={{ color: "#722ed1" }}>
                   Forgot password?
-                </Link>
+                </Link> */}
               </div>
 
               <Form.Item>

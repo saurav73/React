@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Users/Dashboard";
 import Setting from "./pages/Setting";
-import Users from "./pages/Users/Users";
+// import Users from "./pages/Users/Usersbakup";
 import UserAdd from "./pages/Users/UserAdd";
 import Signup from "./pages/auth/Signup";
 import Signin from "./pages/auth/Signin";
@@ -20,6 +20,9 @@ import { ToastContainer } from "react-toastify";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgetPassword";
 import Profile from "./pages/Users/Profile";
+import AdminDashboard from "./pages/admin/AdminDashboard";  
+import Poems from "./pages/admin/Poem";
+import Users from "./pages/admin/User";
 
 
 const App = () => {
@@ -47,12 +50,12 @@ const App = () => {
         </Route>
         <Route path="/dashboard"element={<Dashboard/>}/>
         <Route path="/admin" element={<CustomLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="users" element={<Users  />} />
+          <Route path="dashboard" element={<AdminDashboard/>} />
+          <Route path="users" element={<Users />} />
           <Route path="users/add" element={<UserAdd />} />
           <Route path="users/edit/:userId" element={<UserAdd />} />
           <Route path="users/details/:userId" element={<UserDetails  />} />
-          <Route path="setting" element={<Setting />} />
+          <Route path="setting" element={<Poems />} />
           <Route path="antdesign" element={<Antlayout />} />
         </Route>
       </Routes>

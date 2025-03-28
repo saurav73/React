@@ -1,14 +1,6 @@
 {
   "users": [
     {
-      "id": "09b5",
-      "username": "sujal",
-      "email": "sujal12@gmail.com",
-      "password": "sujal@123",
-      "confirm": "sujal@123",
-      "agreement": true
-    },
-    {
       "id": "2053",
       "username": "test1",
       "email": "test1@gmail.com",
@@ -34,7 +26,7 @@
       "authorAvatar": "https://randomuser.me/api/portraits/men/32.jpg",
       "content": "Two roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth",
       "timestamp": "2 hours ago",
-      "likes": 245,
+      "likes": 246,
       "category": "Classic",
       "tags": [
         "Nature",
@@ -49,7 +41,7 @@
       "authorAvatar": "https://randomuser.me/api/portraits/men/32.jpg",
       "content": "Some say the world will end in fire,\nSome say in ice.\nFrom what I've tasted of desire\nI hold with those who favor fire.\nBut if it had to perish twice,\nI think I know enough of hate\nTo say that for destruction ice\nIs also great\nAnd would suffice.",
       "timestamp": "5 hours ago",
-      "likes": 189,
+      "likes": 190,
       "category": "Classic",
       "tags": [
         "Apocalypse",
@@ -168,7 +160,9 @@
         "Life",
         "Dreams",
         "Love"
-      ]
+      ],
+      "status": "draft",
+      "featured": false
     },
     {
       "id": "3fc9",
@@ -177,7 +171,7 @@
       "authorUsername": "sajesh",
       "content": "sajesh",
       "timestamp": "Just now",
-      "likes": 0,
+      "likes": 2,
       "category": "Inspirational",
       "tags": [
         "Dreams"
@@ -191,7 +185,7 @@
       "authorUsername": "sajesh",
       "content": "सोच र कार्यको सँकुचित लक्ष्य छ! स्पर्शमा।\nसानो कदम चाले अवश्य छुन सकिन्छ चन्द्रमा।।\n\nजिम्मेवारीले तर्सीएर हिड्दै छाै सहकार्यको खोजमा।\nअपरिहार्य छ परिवर्तन तिम्रो त्यो सोच मा।।\n\nयेथेष्ट प्रेम काफी छ, अथाह त मात्र देखावटि\nभुल ती अतितका कुरा अनि छोड त्यो भबिस्यबाणी।।\n\nजरुरी छैन लुकाउन त्यो दुख अनि देखाउन त्यो वेदना।\nगल्ती नभए नि माफी लेउ, प्रकट गर्देउ त्यो कृतज्ञता।।",
       "timestamp": "Just now",
-      "likes": 0,
+      "likes": 2,
       "category": "Nature",
       "tags": [
         "Dreams",
@@ -208,11 +202,28 @@
       "authorUsername": "sajesh1",
       "content": "asdas",
       "timestamp": "Just now",
-      "likes": 0,
+      "likes": 2,
       "category": "Inspirational",
       "tags": [
         "Dreams"
       ]
+    },
+    {
+      "id": "cafa",
+      "title": "admin",
+      "content": "admin",
+      "category": "Nature",
+      "tags": [
+        "Nature"
+      ],
+      "status": "published",
+      "featured": true,
+      "user_id": "b7f4",
+      "author": "sajesh1",
+      "authorUsername": "sajesh1",
+      "authorAvatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "timestamp": "Just now",
+      "likes": 2
     }
   ],
   "notifications": [
@@ -220,28 +231,28 @@
       "id": "1",
       "message": "Your poem 'The Road Not Taken' received a new like!",
       "timestamp": "5 mins ago",
-      "userId": "09b5",
+      "userId": null,
       "read": false
     },
     {
       "id": "2",
       "message": "Emily Dickinson commented on your poem.",
       "timestamp": "1 hour ago",
-      "userId": "09b5",
+      "userId": null,
       "read": false
     },
     {
       "id": "3",
       "message": "New follower: @wshakespeare",
       "timestamp": "2 hours ago",
-      "userId": "09b5",
+      "userId": null,
       "read": false
     },
     {
       "id": "4",
       "message": "Your poem 'Dreams' was shared by @lhughes.",
       "timestamp": "1 day ago",
-      "userId": "09b5",
+      "userId": null,
       "read": false
     }
   ]

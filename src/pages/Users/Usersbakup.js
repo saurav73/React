@@ -11,7 +11,7 @@ import { deleteUser, getUsers } from "../../utils/user.util";
 
 const { Column, ColumnGroup } = Table;
 
-const Users = (props) => {
+const Usersback = (props) => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
 
@@ -107,4 +107,4 @@ const Users = (props) => {
   );
 };
 
-export default Users;
+export default Usersback;
