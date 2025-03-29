@@ -39,6 +39,7 @@ import { UserContext } from "../../context/user.context";
 import { getPoemsByUserId, updatePoem, deletePoem } from "../../utils/poem.util";
 import { getUser, updateUser } from "../../utils/user.util";
 import { showSuccessToast } from "../../utils/toastify.util";
+import { getUserFromStorage, setUserInStorage, clearAuthStorage } from "../../utils/storage.util"; // Import the new utilities
 
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
@@ -46,6 +47,7 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const Profile = () => {
+   let params = useParams();
   const { userId } = useParams();
   const { _user, _setUser } = useContext(UserContext);
   const [isDarkMode, setIsDarkMode] = useState(
@@ -65,25 +67,25 @@ const Profile = () => {
   const [editPoemForm] = Form.useForm();
   const navigate = useNavigate();
 
+  // Handle storage events (e.g., logout from another tab)
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === "user" && !event.newValue) {
+        navigate("/");
+        message.error("Session expired. Please log in again.");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [navigate]);
+
   // Fetch user data on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
+    const parsedUser = getUserFromStorage();
+    if (!parsedUser) {
       navigate("/");
       message.error("Please log in to continue");
-      return;
-    }
-
-    let parsedUser;
-    try {
-      parsedUser = JSON.parse(storedUser);
-    } catch (error) {
-      console.error("Error parsing user from localStorage:", error);
-      localStorage.removeItem("user");
-      localStorage.removeItem("is_login");
-      localStorage.removeItem("auth_token");
-      navigate("/");
-      message.error("Invalid user data. Please log in again.");
       return;
     }
 
@@ -102,10 +104,11 @@ const Profile = () => {
           id: data.id,
           username: data.username || `user${data.id}`,
           email: data.email || "",
-          avatar: data.avatar || "https://randomuser.me/api/portraits/men/1.jpg",
+          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
         };
         setUser(userData);
         _setUser(userData);
+        setUserInStorage(userData); // Update localStorage with the latest user data
       })
       .catch((error) => {
         console.error("Error fetching user:", error);
@@ -127,7 +130,7 @@ const Profile = () => {
     setIsLoadingPoems(true);
     getPoemsByUserId(_user.id)
       .then((data) => {
-        const userPoems = Array.isArray(data) ? data.filter(poem => poem.user_id === _user.id) : [];
+        const userPoems = Array.isArray(data) ? data.filter((poem) => poem.user_id === _user.id) : [];
         setPoems(userPoems);
       })
       .catch((error) => {
@@ -156,18 +159,29 @@ const Profile = () => {
   };
 
   const handleEditProfileSubmit = async (values) => {
-    if (!user) return;
-
+    if (!user?.id) {
+      message.error("No valid user found");
+      return;
+    }
+  
     try {
       const updatedUser = await updateUser(user.id, values);
+      
+      if (!updatedUser) {
+        throw new Error("No updated user data received");
+      }
+  
+      // Update all states and storage
       setUser(updatedUser);
       _setUser(updatedUser);
+      setUserInStorage(updatedUser);
+  
       setIsEditProfileModalVisible(false);
       form.resetFields();
       showSuccessToast("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
-      message.error("Failed to update profile");
+      message.error(error.message || "Failed to update profile");
     }
   };
 
@@ -198,7 +212,7 @@ const Profile = () => {
       content: values.content,
       category: values.category,
       tags: Array.isArray(values.tags) ? values.tags : values.tags.split(",").map((tag) => tag.trim()),
-      user_id: _user.id
+      user_id: _user.id,
     };
 
     updatePoem(currentPoem.id, updatedPoem)
@@ -258,9 +272,7 @@ const Profile = () => {
           label: "Logout",
           icon: <LogoutOutlined />,
           onClick: () => {
-            localStorage.removeItem("is_login");
-            localStorage.removeItem("user");
-            localStorage.removeItem("auth_token");
+            clearAuthStorage(); // Use the utility to clear storage
             _setUser(null);
             navigate("/");
             message.success("You have been logged out successfully");
@@ -986,7 +998,7 @@ const Profile = () => {
                   padding: "6px 20px",
                   fontSize: "14px",
                   background: "#ef4444",
-                  color: "#ffffff", // Ensure text is white for contrast
+                  color: "#ffffff",
                   border: "none",
                   boxShadow: "0 4px 15px rgba(239, 68, 68, 0.3)",
                   transition: "all 0.3s ease",

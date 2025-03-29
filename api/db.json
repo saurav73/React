@@ -10,7 +10,7 @@
     },
     {
       "id": "b7f4",
-      "username": "sajesh1",
+      "username": "sajesh",
       "email": "sajesh@gmail.com",
       "password": "sajesh@123",
       "confirm": "sajesh@123",
@@ -109,7 +109,7 @@
     },
     {
       "id": "8e6f",
-      "title": "सोच र कार्यको सँकुचित लक्ष्य",
+      "title": "सोच र कार्यको सँकुचित लक्ष्य ",
       "user_id": "b7f4",
       "author": "sajesh",
       "authorUsername": "sajesh",
